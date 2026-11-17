@@ -1,0 +1,45 @@
+# Throwaway probe for Fount Cloud's runner link (fount-broker internal/link). Two
+# instances of one release dial each other through their shims and run the
+# attested handshake. Holds no secret: the only key is the per-boot fount-link
+# key, and only echoes cross the link. See README.md.
+cvm-version: 0.14.17 # https://github.com/tinfoilsh/cvmimage/releases/latest, no `v`
+cpus: 2
+memory: 8192
+
+# The same declaration the runner's broker and the coordinator will carry.
+attested-keys:
+  - id: fount-link
+    key: ed25519
+
+networks:
+  # Instances dial each other's public domains, which aren't known until they
+  # exist, so an allowlist can't name them.
+  peers:
+    egress: open
+
+containers:
+  - name: probe
+    image: "ghcr.io/zeke-02/link-probe@sha256:PLACEHOLDER_DIGEST" # from Build Image
+    networks: [peers]
+    keys: [fount-link]
+    attestation: true
+    restart: always
+    healthcheck:
+      test: ["CMD", "/probe", "health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 1m
+    env:
+      - PEER_PIN: "zeke-02/link-probe"
+      # A verifiable repository the peer isn't built from.
+      - WRONG_PIN: "zeke-02/key-transfer-probe"
+
+shim:
+  upstream-port: 8080
+  paths:
+    - /health
+    - /fount-link
+    - /self
+    - /run
+    - /status

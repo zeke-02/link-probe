@@ -19,7 +19,7 @@ networks:
 
 containers:
   - name: probe
-    image: "ghcr.io/zeke-02/link-probe@sha256:PLACEHOLDER_DIGEST" # from Build Image
+    image: "ghcr.io/zeke-02/link-probe@sha256:e3e3d242fd7ecd5e7b385be293523b166eba348822de613f68e270ea0482ceeb" # from Build Image
     networks: [peers]
     keys: [fount-link]
     attestation: true
